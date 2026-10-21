@@ -1,0 +1,170 @@
+# 领域数据模型（唯一事实源，AI Coding 直接消费，禁止转写时发挥）
+# 说明：
+# - enum 类型的 values 为存储值，界面文案以 00-overview 术语表为准
+# - 密码不入模型：账号密码以哈希存储于 account 表（字段名 passwordHash，不对外传输）
+# - 删除规则见 00 假设 A5/A6
+
+entities:
+  account:                   # 账号（用户中心）
+    comment: 三种角色：admin=主账号（仅1个）/pm=产品经理/dev=研发；研发无任何写权限（提交问答与反馈除外）
+    fields:
+      id:        { type: string, example: "u1", comment: "内部主键" }
+      username:  { type: string, example: "wanglei", comment: "登录名，全局唯一，创建后不可改" }
+      name:      { type: string, example: "王磊", comment: "显示姓名" }
+      role:      { type: enum, values: [admin, pm, dev], comment: "admin 全系统仅 1 个，不可被删除/停用/降权" }
+      active:    { type: bool, example: true, comment: "停用后不可登录，历史数据保留署名" }
+      dingtalkUserid: { type: string, required: false, example: "zhangsan01", comment: "钉钉 userid（D22）：接收「问答未解决」工作通知，主账号在账号管理中配置" }
+      createdAt: { type: datetime, example: "2026-10-10 09:00" }
+
+  project:                   # 项目（顶层业务线）
+    comment: 初始三个：电商/金融/链接；仅当其下无版本时可删除（A6）
+    fields:
+      id:        { type: string, example: "pj1" }
+      name:      { type: string, example: "电商", comment: "全局唯一" }
+      createdAt: { type: datetime, example: "2026-10-10 09:00" }
+
+  version:                   # 版本（迭代容器，归档单位）
+    comment: 原型挂在版本下；归档操作将其 status 刷为已归档并联动版本下需求
+    fields:
+      id:         { type: string, example: "v87" }
+      projectId:  { type: ref, ref: "project.id" }
+      name:       { type: string, example: "Sprint87", comment: "同一项目下唯一" }
+      status:     { type: enum, values: [进行中, 已归档], comment: "单向流转：进行中→已归档，无逆向" }
+      summary:    { type: text, required: false, comment: "归档时生成的版本索引全文（D19：原“版本摘要”口径升级为版本索引），归档后才有值" }
+      kbDocId:    { type: string, required: false, comment: "知识库标识（D19 起为 p{projectId}_s{versionId} 形式），用于排查" }
+      archivedBy: { type: ref, ref: "account.id", required: false }
+      archivedAt: { type: datetime, required: false }
+      createdAt:  { type: datetime, example: "2026-10-10 09:00" }
+
+  requirement:               # 需求（需求池核心实体）
+    comment: 12 字段模型（系统自动写入 3 个：createdAt/createdBy/actualOnlineDate；D26 移除 productDays/tags）；状态六态任意方向手动流转（反直觉约定①）
+    fields:
+      id:                { type: string, rule: "RQ+yyMMdd+4位序列", example: "RQ2610100031" }
+      title:             { type: string, example: "司机端准驾车型校验提示优化", comment: "必填" }
+      projectId:         { type: ref, ref: "project.id", comment: "必填" }
+      versionId:         { type: ref, ref: "version.id", required: false, comment: "未纳入版本时为 null；版本归属可随时改" }
+      pmId:              { type: ref, ref: "account.id", comment: "负责 PM，必填，仅可选 role=pm 的账号" }
+      status:            { type: enum, values: [待澄清, 待设计, 设计中, 待串讲, 研发中, 已上线], comment: "六态手动任意互转；归档批量置为已上线" }
+      priority:          { type: enum, values: [P0, P1, P2], comment: "【A3 已接受默认】", example: "P1" }
+      requester:         { type: string, required: false, example: "运营部-王芳", comment: "需求方，【T3 已接受默认：自由文本】" }
+      description:       { type: text, required: false, comment: "需求描述长文本，合并了旧 WPS 的说明/备注" }
+      value:             { type: string, required: false, example: "减少客服进线量约15%", comment: "需求价值短文本" }
+      jiraUrl:           { type: string, required: false, example: "https://jira.internal/browse/YXB-1024", comment: "Jira 链接；D23 起由「转 Jira」回写（存 issueKey，展示时拼 base_url/browse/），兼容手填完整 URL" }
+      jiraSync:          { type: string, required: false, comment: "D23：Jira 同步状态，取值：空=未关联 / 已关联 / 同步失败" }
+      jiraError:         { type: text, required: false, comment: "D23：最近一次 Jira 同步失败原因（同步失败时供重试排查）" }
+      plannedOnlineDate: { type: date, required: false, comment: "计划上线日期，人工维护" }
+      actualOnlineDate:  { type: date, required: false, comment: "实际上线日期，仅归档联动自动写入，禁止手填" }
+      createdBy:         { type: ref, ref: "account.id", comment: "系统按登录账号写入" }
+      createdAt:         { type: datetime, example: "2026-10-10 09:00" }
+      updatedAt:         { type: datetime, example: "2026-10-10 09:00" }
+
+  material:                  # 材料（需求维度附件）
+    comment: 共享可见，供 Agent-1 引用；绝不写入知识库（反直觉约定③）
+    fields:
+      id:            { type: string, example: "m12" }
+      requirementId: { type: ref, ref: "requirement.id" }
+      fileName:      { type: string, example: "客服进线录音纪要.pdf" }
+      size:          { type: number, unit: 字节, example: 8388608, comment: "单文件 ≤20MB（20971520 字节）" }
+      mime:          { type: string, example: "application/pdf", comment: "白名单见 04 需求详情页校验列" }
+      uploadedBy:    { type: ref, ref: "account.id" }
+      createdAt:     { type: datetime, example: "2026-10-10 09:00" }
+
+  prototype:                 # 原型（Axure 导出 HTML 整目录；D34 起含 HTML demo）
+    comment: 同一版本下 name+kind 联合唯一；同名同类上传=删旧目录换新目录整体覆盖（反直觉约定②）；D34：kind=demo 为 AI 生成的 HTML 过程体验稿，不开问答、不进知识库（归档语料只取 prototype）
+    fields:
+      id:         { type: string, example: "pr7" }
+      versionId:  { type: ref, ref: "version.id" }
+      kind:       { type: enum, values: [prototype, demo], default: prototype, comment: "D34：prototype=Axure 原型 / demo=HTML demo（支持单 .html 文件直传）" }
+      name:       { type: string, example: "准驾校验优化原型", comment: "同版本同类下唯一，即覆盖判定的 key" }
+      entryPath:  { type: string, example: "index.html", comment: "探测规则见 00 假设 A7" }
+      dirPath:    { type: string, example: "uploads/prototypes/v87/pr7/", comment: "服务端落盘目录" }
+      fileCount:  { type: number, example: 213, comment: "目录内文件总数" }
+      totalSize:  { type: number, unit: 字节, example: 52428800 }
+      uploadedBy: { type: ref, ref: "account.id" }
+      updatedAt:  { type: datetime, example: "2026-10-10 09:00", comment: "覆盖上传时刷新" }
+
+  conversation:              # 预设计对话（Agent-1）
+    comment: 需求维度，PM 间共享可见可接力；研发不可见（反直觉约定④）
+    fields:
+      id:            { type: string, example: "cv3" }
+      requirementId: { type: ref, ref: "requirement.id" }
+      title:         { type: string, example: "准驾误拦场景脑暴", comment: "默认=需求标题，可改" }
+      createdBy:     { type: ref, ref: "account.id" }
+      createdAt:     { type: datetime, example: "2026-10-10 09:00" }
+      updatedAt:     { type: datetime, example: "2026-10-10 09:00" }
+
+  message:                   # 对话消息
+    fields:
+      id:             { type: string, example: "msg101" }
+      conversationId: { type: ref, ref: "conversation.id" }
+      role:           { type: enum, values: [user, assistant] }
+      content:        { type: text, example: "准驾误拦的存量数据占比是多少？" }
+      authorId:       { type: ref, ref: "account.id", required: false, comment: "role=user 时必有值；assistant 时为 null" }
+      createdAt:      { type: datetime, example: "2026-10-10 09:00" }
+
+  qaLog:                     # 原型问答记录（Agent-2）
+    comment: D17 曾移除反馈闭环；D22 起恢复"未解决"升级通道（生成 AC 式摘要 + 钉钉推送原型上传人），"已解决"仍为历史值不再写入
+    fields:
+      id:          { type: string, example: "q21" }
+      prototypeId: { type: ref, ref: "prototype.id" }
+      question:    { type: text, example: "这个拦截提示在绑车环节也会出现吗？" }
+      answer:      { type: text, comment: "Agent-2 给出的回答全文" }
+      feedback:    { type: enum, values: [未反馈, 已解决, 未解决], comment: "D22：未反馈=初始态；未解决=已升级待 PM 处理；已解决仅历史数据保留" }
+      summary:     { type: text, required: false, comment: "D22：升级时 LLM 按 AC 模板生成的摘要（谁/前置条件/操作与逻辑/预期 vs 实际/待裁决问题）" }
+      pushStatus:  { type: string, required: false, comment: "D22：钉钉推送结果，取值：空=未推送 / 已推送 / 推送失败" }
+      pushError:   { type: text, required: false, comment: "D22：推送失败原因（不阻断升级本身）" }
+      askedBy:     { type: ref, ref: "account.id", comment: "提问人（任何登录角色均可提问）" }
+      handledBy:   { type: ref, ref: "account.id", required: false, comment: "D22 恢复：PM/主账号标记已处理时写入" }
+      handledAt:   { type: datetime, required: false, comment: "D22 恢复：标记已处理时间" }
+      createdAt:   { type: datetime, example: "2026-10-10 09:00" }
+
+  knowledgeEntry:            # 知识条目（D19：需求级知识卡 + 版本级索引）
+    comment: 归档时由 LLM 从需求字段+材料+预设计对话+原型片段提炼生成（入库的是提炼结果而非原文，不违反反直觉约定③）；内容切块写入内置 Chroma 向量库供检索
+    fields:
+      id:            { type: string, example: "ke12" }
+      projectId:     { type: ref, ref: "project.id" }
+      versionId:     { type: ref, ref: "version.id" }
+      requirementId: { type: ref, ref: "requirement.id", required: false, comment: "kind=index 时为 null" }
+      reqNo:         { type: string, required: false, comment: "冗余需求编号，便于检索标注" }
+      title:         { type: string, example: "司机端准驾车型校验提示优化" }
+      kind:          { type: enum, values: [requirement, index], comment: "requirement=需求知识卡；index=版本索引（每版本 1 条）" }
+      content:       { type: text, comment: "条目正文（知识卡为固定小节结构；索引为版本概述+逐需求一行定位）" }
+      publishIds:    { type: list, of: ref, ref: "prototype.id", required: false, comment: "D21：关联原型 id（需求条目=归档时命中的关联原型片段来源；索引条目=该版本全部原型），知识问答佐证链接依据" }
+      edited:        { type: bool, default: false, comment: "人工编辑过=true；重归档/重试时 edited 的版本索引不覆盖，已存在的需求条目一律跳过" }
+      createdAt:     { type: datetime, example: "2026-10-10 09:00" }
+      updatedAt:     { type: datetime, example: "2026-10-10 09:00" }
+
+  config:                    # 全局配置（仅主账号可写）
+    comment: key-value 结构；key 全集在本文件 enums.configKeys 声明，禁止新增未声明 key
+    fields:
+      key:       { type: string, example: "llm.model", comment: "取值见 enums.configKeys" }
+      value:     { type: text, example: "kimi-k3" }
+      updatedAt: { type: datetime, example: "2026-10-10 09:00" }
+
+# 全局枚举
+enums:
+  reqStatus: [待澄清, 待设计, 设计中, 待串讲, 研发中, 已上线]
+  configKeys:
+    - llm.base_url        # LLM 网关地址
+    - llm.api_key         # LLM 网关密钥（界面掩码显示）
+    - llm.model           # LLM 模型名
+    - agent1.system_prompt      # Agent-1 系统提示词（含回答范围约定）
+    # agent1.use_kb 已于 D15 移除：知识库检索为 Agent-1 默认能力，不再有开关
+    - agent2.system_prompt      # Agent-2 系统提示词（含回答范围约定）
+    - agent2.use_kb             # Agent-2 是否检索知识库：true/false
+    - archive.summary_template  # 归档版本索引提示词模板（D19：作用于版本索引条目，含 {project}/{version} 占位）
+    - knowledge.top_k           # 检索召回片段数，1-20（D20）
+    - knowledge.chunk_size      # 知识条目切块字数，200-4000（D20；新归档/重建的条目生效）
+    - knowledge.chunk_overlap   # 相邻切块重叠字数，0 至 chunk_size 的一半（D20）
+    - dingtalk.app_key          # 钉钉企业内部应用 AppKey（D22）
+    - dingtalk.app_secret       # 钉钉应用 AppSecret（D22；界面掩码不回显）
+    - dingtalk.agent_id         # 钉钉应用 AgentId（D22）
+    - dingtalk.hub_base_url     # PM Hub 外网/内网访问地址，用于钉钉消息跳转链接（D22）
+    - escalate.ac_template      # 升级摘要 AC 模板提示词（D22，主账号可调）
+    - jira.base_url             # Jira 实例地址（D23）
+    - jira.email                # Jira 认证账号（Cloud=邮箱，Server=用户名）（D23）
+    - jira.api_token            # Jira API Token / PAT（D23；界面掩码不回显）
+    - jira.project_key          # 转 Jira 的全局单一目标项目（D23）
+    - jira.story_template       # 用户故事生成模板提示词（D23，主账号可调）
+    - kb.rag_base_url     # 开源 RAG 产品的内网地址（iframe 嵌入与 API 调用共用）
+    - kb.rag_api_key      # RAG 产品 API 密钥

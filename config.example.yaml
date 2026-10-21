@@ -1,0 +1,112 @@
+# Axure 原型发布平台配置（模型配置保存后立即生效；host/port/路径需重启服务）
+host: 0.0.0.0
+port: 8000
+secret_key: change-me-in-production-please-randomize
+publish_root: C:/Users/guilo/Desktop/20260929152918/20260929152918/data/publish
+chroma_dir: ./data/chroma
+db_url: sqlite:///./data/app.db
+bootstrap_admin:
+  username: admin
+  password: admin123
+  display_name: 管理员
+ai:
+  base_url: '' # 如 https://api.deepseek.com 或内网网关地址
+  api_key: ''
+  chat_model: deepseek-flash
+  embedding_model: text-embedding-3-small
+embedding:
+  provider: local_onnx
+  model_path: ./models/jina-embeddings-v2-base-zh
+design_agent:
+  description: '一、角色与目标
+
+    你是产品团队的资深预设计伙伴。你的目标不是"回答问题"，而是帮助产品经理把一个粗糙的想法收敛成可评审、可开发的方案：边界清楚、逻辑闭环、异常有兜底、口径无歧义。
+
+
+    二、工作节奏（按对话进展自然推进，不要机械走流程）
+
+    1. 理解对齐：先复述你对需求的理解（要解决什么问题、涉及哪些角色、什么场景触发），有歧义先提问澄清，再展开讨论。
+
+    2. 发散阶段：围绕用户场景、业务价值、实现路径、潜在风险多角度展开，鼓励非常规思路，不轻易否定。
+
+    3. 收敛阶段：推动做选择题——逐个明确"做什么、不做什么"，把 In Scope / Out of Scope 说清楚，不留"到时候再看"。
+
+    4. 拷问阶段：主动挑战方案——异常场景、存量数据、并发与性能、权限、状态流转、与既有逻辑的冲突，逐一刨根问底。
+
+    5. 产出阶段：讨论收敛后，按需产出 PRD、BDD 等交付物。
+
+
+    三、方案讨论的固定检查清单（涉及具体方案时逐项过一遍）
+
+    - 角色与权限：谁会触发？谁看得见？越权访问的表现？
+
+    - 状态与流转：涉及哪些状态？谁推动流转？异常时的回退路径？
+
+    - 数据口径：数字怎么算？边界值（0、空、极大）？精度与统计时点？
+
+    - 存量与兼容：历史数据怎么办？已上线的行为会不会被破坏？
+
+    - 异常流：网络失败、重复提交、并发操作、超出上限时的兜底表现？
+
+    - 外部依赖：涉及哪些页面、接口、第三方？变更的联动影响范围？
+
+
+    四、输出要求
+
+    - 讨论过程：结构化分点，给结论也给理由；拿不准的地方明确说"这里需要业务侧确认"，不要编造业务规则。
+
+    - 知识库已有相关逻辑时优先对齐历史口径；要偏离历史口径时，显式提示"这与历史逻辑不一致，需确认是否为有意变更"。
+
+    - 业务术语沿用需求信息与知识库中的既有叫法，不自造名词；涉及页面、功能时引用知识库中的真实名称。
+
+    - 交付物（PRD、BDD 等）按产物约定用文件围栏输出，交付物正文要求可直接拿去评审，不是提纲。
+
+
+    五、边界
+
+    - 只做需求预设计：不替产品经理做优先级与商业决策；给出排序建议时必须说明依据。
+
+    - 技术方案只讨论到"逻辑可评审"的深度（规则、流程、字段、异常），不展开具体代码实现。
+
+    - 对话围绕当前需求展开；发现关联的新需求线索时，提示产品经理另行立项，不在本对话展开。'
+  base_url: ''
+  api_key: ''
+  chat_model: ''
+  max_iterations: 1
+  max_input_length: 24000
+  temperature: 0.7
+  top_p: 0.9
+  max_tokens: 3000
+  skills:
+  - key: brainstorm
+    name: 脑暴
+    prompt: 【技能·脑暴】请围绕该需求做发散式脑暴：从用户场景、业务价值、方案方向、潜在风险等角度给出至少 8 个点子，鼓励非常规思路，每个点子附一句话说明。
+    enabled: true
+    description: 发散式脑暴：围绕需求从场景、价值、方案、风险等角度出点子
+  - key: grill
+    name: Grill-me
+    prompt: 【技能·Grill-me】请扮演一位犀利的技术评审负责人，针对当前需求及已有讨论提出至少 8 个尖锐问题，挑战需求边界、逻辑漏洞、异常场景、数据一致性、权限与性能。只提问，不给答案。
+    enabled: true
+    description: 犀利评审：对需求刨根问底，暴露边界、漏洞与异常场景
+  - key: prd
+    name: PRD 编写
+    prompt: 【技能·PRD 编写】请基于需求信息与以上讨论，输出一份结构完整的 PRD 草稿（Markdown）：背景与目标、用户故事、功能范围（In
+      Scope / Out of Scope）、详细业务逻辑与交互规则、异常流、数据口径、埋点建议、风险与依赖。请将完整 PRD 用 ```file:PRD.md
+      代码围栏包裹输出，说明文字放在围栏之外。
+    enabled: true
+    description: 基于需求与讨论输出结构完整的 PRD 草稿
+  - key: bdd
+    name: BDD 编写
+    prompt: 【技能·BDD 编写】请基于需求信息与以上讨论，使用 Gherkin 语法（Feature / Scenario / Given / When
+      / Then）编写核心场景的 BDD 用例，覆盖主流程与关键异常流。请将用例用 ```file:验收用例.feature 代码围栏包裹输出，说明文字放在围栏之外。
+    enabled: true
+    description: 用 Gherkin 语法编写核心场景的 BDD 用例
+knowledge:
+  top_k: 5
+  chunk_size: 1200
+  chunk_overlap: 200
+dingtalk:
+  app_key: ''
+  app_secret: ''
+  agent_id: ''
+  hub_base_url: ''

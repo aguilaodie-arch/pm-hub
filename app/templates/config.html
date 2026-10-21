@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>系统配置 - 产品需求管理平台</title>
+  <style>
+    :root {
+      --bg: #09090b; --bg-panel: #141417;
+      --border: rgba(255,255,255,.075); --border-strong: rgba(255,255,255,.16);
+      --text: #e9e9ee; --text-2: #a2a2ad; --text-3: #62626e;
+      --accent: #7c7cf4; --accent-soft: rgba(124,124,244,.13);
+      --green: #4cc38a; --red: #e5605a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px; -webkit-font-smoothing: antialiased;
+    }
+    .topbar {
+      height: 52px; display: flex; align-items: center; gap: 14px;
+      padding: 0 24px; border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--text-2);
+    }
+    .back {
+      display: inline-flex; align-items: center; gap: 6px; color: var(--text-2);
+      text-decoration: none; font-size: 13px; padding: 5px 10px; border-radius: 7px;
+      transition: background .12s, color .12s;
+    }
+    .back:hover { background: rgba(255,255,255,.06); color: var(--text); }
+    .back svg { width: 14px; height: 14px; }
+    .topbar b { color: var(--text); font-weight: 650; }
+    .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--text-3); }
+    .topbar .right a { color: var(--text-3); text-decoration: none; }
+    .topbar .right a:hover { color: var(--text); }
+
+    .wrap { max-width: 680px; margin: 0 auto; padding: 36px 24px 64px; }
+    h1 { font-size: 22px; font-weight: 650; letter-spacing: -.2px; margin: 0 0 6px; }
+    .sub { color: var(--text-3); font-size: 13px; margin-bottom: 22px; line-height: 1.7; }
+
+    /* Tab 栏 */
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      padding: 9px 16px; border: none; background: transparent; cursor: pointer;
+      font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--text-3);
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .12s, border-color .12s;
+    }
+    .tab:hover { color: var(--text-2); background: transparent; }
+    .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .tab:disabled { opacity: 1; cursor: pointer; }
+
+    .card {
+      background: var(--bg-panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin-bottom: 18px;
+    }
+    .grp-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 650; margin: 0 0 4px;
+    }
+    .grp-title svg { width: 16px; height: 16px; color: var(--accent); }
+    .grp-sub { font-size: 12.5px; color: var(--text-3); margin-bottom: 16px; }
+    label { display: block; font-size: 12.5px; color: var(--text-2); font-weight: 550; margin: 14px 0 6px; }
+    input {
+      width: 100%; padding: 9px 12px; font-family: inherit; font-size: 13.5px;
+      background: var(--bg); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 8px; outline: none; transition: border-color .12s, box-shadow .12s;
+    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .tip { font-size: 12px; color: var(--text-3); margin-top: 5px; }
+
+    .foot { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+    button {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 10px 22px; border: none; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 13.5px; font-weight: 650;
+      background: #ededf2; color: #0b0b0d; transition: background .12s;
+    }
+    button:hover { background: #fff; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .ok { font-size: 13px; color: var(--green); display: none; align-items: center; gap: 6px; }
+    .ok svg { width: 15px; height: 15px; }
+    .spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid rgba(0,0,0,.25); border-top-color: #0b0b0d;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* 用户管理 */
+    .u-table { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 4px; }
+    .u-row {
+      display: grid; grid-template-columns: 1.2fr 1.2fr 90px 150px 130px;
+      gap: 10px; align-items: center; padding: 10px 14px;
+      border-top: 1px solid var(--border); font-size: 13px;
+    }
+    .u-row.head { border-top: none; font-size: 11.5px; color: var(--text-3); font-weight: 600; background: var(--bg); padding: 8px 14px; }
+    .u-row:not(.head):hover { background: rgba(255,255,255,.03); }
+    .u-row .cell { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .u-row .c-sub { color: var(--text-3); font-size: 12px; }
+    .u-row .c-ops { display: flex; gap: 6px; justify-content: flex-end; }
+    .role-badge { display: inline-block; font-size: 11px; font-weight: 650; border-radius: 6px; padding: 2px 8px; border: 1px solid; }
+    .role-admin { color: var(--accent); border-color: rgba(124,124,244,.4); background: var(--accent-soft); }
+    .role-member { color: var(--text-2); border-color: var(--border-strong); }
+    .role-dev { color: var(--green); border-color: rgba(76,195,138,.4); background: rgba(76,195,138,.08); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent;
+      border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px;
+      font-weight: 600; padding: 8px 16px; transition: all .12s; white-space: nowrap;
+    }
+    .btn-sm { padding: 5px 11px; font-size: 12.5px; border-radius: 7px; }
+    .btn-primary { background: #ededf2; color: #0b0b0d; border: none; }
+    .btn-primary:hover { background: #fff; }
+    .btn-ghost { background: transparent; color: var(--text-2); border-color: var(--border-strong); }
+    .btn-ghost:hover { background: rgba(255,255,255,.06); color: var(--text); }
+    .btn-danger { background: rgba(229,96,90,.12); color: var(--red); border-color: rgba(229,96,90,.35); }
+    .card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .modal-mask {
+      position: fixed; inset: 0; background: rgba(0,0,0,.62);
+      display: flex; align-items: center; justify-content: center; z-index: 50;
+    }
+    .modal {
+      width: 420px; max-width: 92vw; background: #141417;
+      border: 1px solid var(--border-strong); border-radius: 14px; padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.55);
+    }
+    .modal h3 { margin: 0 0 16px; font-size: 16px; }
+    .modal select {
+      width: 100%; padding: 9px 12px; font-family: inherit; font-size: 13.5px;
+      background: var(--bg); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 8px; outline: none;
+    }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    #toast { position: fixed; bottom: 26px; right: 26px; z-index: 99; display: flex; flex-direction: column; gap: 8px; }
+    .toast-item {
+      background: #1c1c21; border: 1px solid var(--border-strong); color: var(--text);
+      border-radius: 10px; padding: 11px 16px; font-size: 13px; box-shadow: 0 8px 30px rgba(0,0,0,.5);
+    }
+    .toast-item.ok { border-left: 3px solid var(--green); }
+    .toast-item.err { border-left: 3px solid var(--red); }
+
+    /* Agent 高级选项 / 技能编辑 */
+    textarea {
+      width: 100%; padding: 9px 12px; font-family: inherit; font-size: 13.5px;
+      background: var(--bg); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 8px; outline: none; resize: vertical; line-height: 1.6;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+    .skill-item { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 12px; }
+    .skill-item.off { opacity: .55; }
+    .skill-head { display: flex; align-items: center; gap: 10px; }
+    .skill-head input.sk-name { width: 180px; padding: 7px 10px; font-size: 13px; }
+    .skill-head .sk-key { font-size: 11.5px; color: var(--text-3); font-family: ui-monospace, monospace; }
+    .skill-head .sk-ops { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .skill-item textarea { margin-top: 10px; font-size: 12.5px; min-height: 70px; }
+    .switch { position: relative; width: 34px; height: 19px; flex: 0 0 auto; cursor: pointer; }
+    .switch input { display: none; }
+    .switch .track {
+      position: absolute; inset: 0; border-radius: 10px;
+      background: rgba(255,255,255,.14); transition: background .15s;
+    }
+    .switch .track::after {
+      content: ""; position: absolute; top: 2.5px; left: 3px; width: 14px; height: 14px;
+      border-radius: 50%; background: #fff; transition: transform .15s;
+    }
+    .switch input:checked + .track { background: var(--accent); }
+    .switch input:checked + .track::after { transform: translateX(14px); }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="back" href="/">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    返回工作台
+  </a>
+  <b>系统配置</b>
+  <div class="right">{{ user.display_name }}（管理员）· <a href="/logout">退出</a></div>
+</header>
+
+<div class="wrap">
+  <h1>系统配置</h1>
+  <div class="sub">当前配置来自 config.yaml。模型配置保存后立即生效；host / port / 路径类配置需重启服务后生效。</div>
+
+  <div class="tabs">
+    <button type="button" class="tab active" data-tab="basic">基础设置</button>
+    <button type="button" class="tab" data-tab="models">模型设置</button>
+    <button type="button" class="tab" data-tab="users">用户管理</button>
+    <button type="button" class="tab" data-tab="agent">预设计 Agent</button>
+  </div>
+
+  <!-- ============ Tab 1: 基础设置 ============ -->
+  <div class="tab-panel" id="panel-basic">
+    <form id="basicForm">
+      <input type="hidden" name="section" value="basic" />
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.2 4.2l2.8 2.8m10 10 2.8 2.8M1 12h4m14 0h4M4.2 19.8l2.8-2.8m10-10 2.8-2.8"/></svg>
+          基础
+        </div>
+        <div class="grp-sub">服务运行与文件存储相关配置（修改后需重启服务生效）</div>
+        <label>服务地址 host</label>
+        <input name="host" value="{{ settings.host }}" />
+        <label>服务端口 port</label>
+        <input name="port" value="{{ settings.port }}" />
+        <label>会话密钥 secret_key</label>
+        <input name="secret_key" value="{{ settings.secret_key }}" />
+        <label>原型文件根目录 publish_root</label>
+        <input name="publish_root" value="{{ settings.publish_root }}" />
+      </div>
+      <div class="foot">
+        <button type="submit" class="saveBtn">保存配置</button>
+        <div class="ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          已保存，重启服务后生效。
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ Tab 2: 模型设置 ============ -->
+  <div class="tab-panel" id="panel-models" style="display:none">
+    <form id="modelForm">
+      <input type="hidden" name="section" value="models" />
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
+          总结与问答模型
+        </div>
+        <div class="grp-sub">用于 Sprint 归档报告、知识库问答与向量检索，兼容 OpenAI 格式</div>
+        <label>API Base URL</label>
+        <input name="ai_base_url" value="{{ settings.ai_base_url }}" placeholder="https://api.openai.com/v1" />
+        <label>API Key</label>
+        <input name="ai_api_key" value="{{ settings.ai_api_key }}" placeholder="sk-..." />
+        <div class="tip">为安全起见，页面不回显已保存的 Key 内容（留空表示不修改）。</div>
+        <label>对话模型 chat_model</label>
+        <input name="chat_model" value="{{ settings.chat_model }}" />
+      </div>
+
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          向量模型（本地）
+        </div>
+        <div class="grp-sub">知识库检索使用的本地向量模型，ONNX 格式、随项目存放，不走三方 API（jina-embeddings-v2-base-zh，768 维）</div>
+        <label>模型目录 model_path</label>
+        <input name="embedding_model_path" value="{{ settings.embedding_model_path }}" placeholder="./models/jina-embeddings-v2-base-zh" />
+        <div class="tip">目录内需包含 tokenizer.json 与 onnx/model_quantized.onnx。保存后立即生效；修改路径后历史知识库向量需重新归档方可检索。</div>
+      </div>
+
+      <div class="foot">
+        <button type="submit" class="saveBtn">保存配置</button>
+        <div class="ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          已保存，模型配置立即生效。
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============ Tab 3: 用户管理 ============ -->
+  <div class="tab-panel" id="panel-users" style="display:none">
+    <div class="card">
+      <div class="card-head">
+        <div>
+          <div class="grp-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            用户管理
+          </div>
+          <div class="grp-sub">管理产品经理账号。成员可登录使用全部业务功能，仅管理员可进入本配置页。</div>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="openUserModal()">+ 新建用户</button>
+      </div>
+      <div class="u-table" id="uTable"></div>
+    </div>
+  </div>
+
+  <!-- ============ Tab 4: 预设计 Agent ============ -->
+  <div class="tab-panel" id="panel-agent" style="display:none">
+    <form id="agentForm">
+      <input type="hidden" name="section" value="design_agent" />
+      <input type="hidden" name="design_skills_json" id="skillsJson" />
+
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+          描述
+        </div>
+        <div class="grp-sub">描述预设计 Agent 的核心工作流，将作为最高优先级注入系统提示词</div>
+        <textarea name="design_description" rows="5" placeholder="例如：你是电商交易链路的预设计助手。工作流：1) 先检索知识库历史逻辑 2) 与产品经理发散讨论 3) 收敛需求边界 4) 输出 PRD/BDD。回答需引用知识库来源。">{{ settings.design_agent.description }}</textarea>
+      </div>
+
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          模型配置
+        </div>
+        <div class="grp-sub">预设计 Agent 挂载的对话模型，可独立于「总结与问答模型」使用更强的模型</div>
+        <label>API Base URL</label>
+        <input name="design_base_url" value="{{ settings.design_agent.base_url }}" placeholder="留空则沿用总结与问答模型配置" />
+        <label>API Key</label>
+        <input name="design_api_key" value="{{ settings.design_agent.api_key }}" placeholder="留空则沿用总结与问答模型配置" />
+        <label>对话模型 chat_model</label>
+        <input name="design_model" value="{{ settings.design_agent.chat_model }}" placeholder="如 gpt-4o、qwen-max 等" />
+        <div class="tip">全部留空 = 使用「模型设置」页主模型；填写后清空即可恢复沿用。</div>
+      </div>
+
+      <div class="card">
+        <div class="grp-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+          高级选项
+        </div>
+        <div class="grp-sub">直接作用于预设计 Agent 每次对话的生成与上下文策略</div>
+        <div class="opt-grid">
+          <div>
+            <label>最大迭代次数 max_iterations</label>
+            <input name="design_max_iterations" type="number" min="1" max="5" step="1" value="{{ settings.design_agent.max_iterations }}" />
+            <div class="tip">1 = 直接回答；&gt;1 时 Agent 会对自己的回答做自我检查与修正，直到无需修改或达到上限（每次迭代消耗一次模型调用）</div>
+          </div>
+          <div>
+            <label>最大输入长度 max_input_length</label>
+            <input name="design_max_input_length" type="number" min="1000" step="1000" value="{{ settings.design_agent.max_input_length }}" />
+            <div class="tip">送入模型的字符总量上限，超出后从最早的历史消息开始裁剪</div>
+          </div>
+          <div>
+            <label>温度 temperature</label>
+            <input name="design_temperature" type="number" min="0" max="2" step="0.1" value="{{ settings.design_agent.temperature }}" />
+            <div class="tip">越高越发散（脑暴可高），越低越严谨（PRD/BDD 宜低）</div>
+          </div>
+          <div>
+            <label>Top P</label>
+            <input name="design_top_p" type="number" min="0" max="1" step="0.05" value="{{ settings.design_agent.top_p }}" />
+            <div class="tip">核采样概率阈值，与温度配合控制输出多样性</div>
+          </div>
+          <div>
+            <label>最大输出 max_tokens</label>
+            <input name="design_max_tokens" type="number" min="256" step="256" value="{{ settings.design_agent.max_tokens }}" />
+            <div class="tip">单次回答的最大 Token 数，长文档（PRD）建议 3000+</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="grp-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg>
+              Skills 技能
+            </div>
+            <div class="grp-sub">挂载到预设计对话页的技能按钮。可启停、编辑提示词、注册新技能；停用的技能不会出现在对话页。</div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="addSkill()">+ 注册技能</button>
+        </div>
+        <div id="skillList"></div>
+      </div>
+
+      <div class="foot">
+        <button type="submit" class="saveBtn">保存配置</button>
+        <div class="ok">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          已保存，Agent 配置立即生效。
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 用户 新建/编辑弹窗 -->
+<div id="uModal" class="modal-mask" style="display:none">
+  <div class="modal">
+    <h3 id="uModalTitle">新建用户</h3>
+    <label>用户名 *</label>
+    <input id="uName" placeholder="登录使用的用户名" />
+    <label>显示名</label>
+    <input id="uDisplay" placeholder="需求池里展示的产品经理名称" />
+    <label id="uPwdLabel">密码 *</label>
+    <input id="uPwd" type="password" placeholder="登录密码" />
+    <label>角色</label>
+    <select id="uRole">
+      <option value="member">成员（产品经理）</option>
+      <option value="dev">研发（只读 + 对原型提问）</option>
+      <option value="admin">管理员</option>
+    </select>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeUserModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveUser()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ================= Tab 切换 =================
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  ["basic", "models", "users", "agent"].forEach(n => {
+    document.getElementById("panel-" + n).style.display = n === name ? "" : "none";
+  });
+  if (name === "users") loadUsers();
+  history.replaceState(null, "", "#" + name);
+}
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+switchTab((location.hash || "#basic").slice(1));
+
+// ================= 用户管理 =================
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg, type = "ok") {
+  const t = document.createElement("div");
+  t.className = "toast-item " + type;
+  t.textContent = msg;
+  $("toast").appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+let users = [], editingUid = null;
+
+async function loadUsers() {
+  const r = await fetch("/api/users");
+  users = await r.json();
+  const box = $("uTable");
+  box.innerHTML = `<div class="u-row head"><div>用户名</div><div>显示名</div><div>角色</div><div>创建时间</div><div></div></div>` +
+    users.map(u => `
+      <div class="u-row">
+        <div class="cell">${esc(u.username)}</div>
+        <div class="cell">${esc(u.display_name)}</div>
+        <div class="cell"><span class="role-badge role-${u.role}">${({ admin: "管理员", dev: "研发" })[u.role] || "成员"}</span></div>
+        <div class="cell c-sub">${esc((u.created_at || "").slice(0, 10))}</div>
+        <div class="cell c-ops">
+          <button class="btn btn-ghost btn-sm" onclick="openUserModal(${u.id})">编辑</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteUser(this, ${u.id})">删除</button>
+        </div>
+      </div>`).join("");
+}
+
+function openUserModal(uid) {
+  editingUid = uid || null;
+  const u = uid ? users.find(x => x.id === uid) : null;
+  $("uModalTitle").textContent = u ? "编辑用户" : "新建用户";
+  $("uName").value = u ? u.username : "";
+  $("uName").disabled = !!u;
+  $("uDisplay").value = u ? u.display_name : "";
+  $("uPwd").value = "";
+  $("uPwdLabel").textContent = u ? "重置密码（留空则不修改）" : "密码 *";
+  $("uRole").value = u ? u.role : "member";
+  $("uModal").style.display = "flex";
+  setTimeout(() => (u ? $("uDisplay") : $("uName")).focus(), 50);
+}
+
+function closeUserModal() { $("uModal").style.display = "none"; }
+$("uModal").addEventListener("click", e => { if (e.target === $("uModal")) closeUserModal(); });
+
+async function saveUser() {
+  const fd = new URLSearchParams({
+    username: $("uName").value.trim(),
+    display_name: $("uDisplay").value.trim(),
+    password: $("uPwd").value,
+    role: $("uRole").value,
+  });
+  const url = editingUid ? `/api/users/${editingUid}` : "/api/users";
+  const method = editingUid ? "PUT" : "POST";
+  const r = await fetch(url, { method, body: fd });
+  const d = await r.json().catch(() => ({}));
+  if (r.ok) {
+    toast(editingUid ? "用户已更新" : "用户已创建");
+    closeUserModal();
+    loadUsers();
+  } else {
+    toast("保存失败：" + (d.detail || r.status), "err");
+  }
+}
+
+async function deleteUser(btn, uid) {
+  if (!btn.dataset.armed) {
+    btn.dataset.armed = "1";
+    const old = btn.textContent;
+    btn.textContent = "确认删除";
+    btn.classList.add("btn-danger"); btn.classList.remove("btn-ghost");
+    setTimeout(() => { if (btn.isConnected) { btn.dataset.armed = ""; btn.textContent = old; btn.classList.remove("btn-danger"); btn.classList.add("btn-ghost"); } }, 3000);
+    return;
+  }
+  const r = await fetch(`/api/users/${uid}`, { method: "DELETE" });
+  const d = await r.json().catch(() => ({}));
+  if (r.ok) { toast("用户已删除"); loadUsers(); }
+  else toast("删除失败：" + (d.detail || r.status), "err");
+}
+
+// ================= Agent 技能编辑 =================
+let agentSkills = {{ settings.design_agent.skills | tojson }};
+
+function renderSkills() {
+  const box = $("skillList");
+  box.innerHTML = agentSkills.map((s, i) => `
+    <div class="skill-item ${s.enabled ? "" : "off"}" data-i="${i}">
+      <div class="skill-head">
+        <label class="switch" title="启用/停用">
+          <input type="checkbox" ${s.enabled ? "checked" : ""} onchange="toggleSkill(${i}, this.checked)" />
+          <span class="track"></span>
+        </label>
+        <input class="sk-name" value="${esc(s.name)}" placeholder="技能名称" onchange="editSkillName(${i}, this.value)" />
+        <span class="sk-key">${esc(s.key)}</span>
+        <div class="sk-ops">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="delSkill(${i})">删除</button>
+        </div>
+      </div>
+      <textarea rows="3" placeholder="技能提示词：点击该技能时发给 Agent 的指令" onchange="editSkillPrompt(${i}, this.value)">${esc(s.prompt)}</textarea>
+    </div>`).join("");
+}
+function toggleSkill(i, on) { agentSkills[i].enabled = on; renderSkills(); }
+function editSkillName(i, v) { agentSkills[i].name = v.trim() || agentSkills[i].name; }
+function editSkillPrompt(i, v) { agentSkills[i].prompt = v; }
+function delSkill(i) { agentSkills.splice(i, 1); renderSkills(); }
+function addSkill() {
+  agentSkills.push({
+    key: "skill_" + Date.now().toString(36),
+    name: "新技能",
+    prompt: "",
+    enabled: true,
+  });
+  renderSkills();
+}
+renderSkills();
+
+// 提交前把技能列表序列化到隐藏字段
+$("agentForm").addEventListener("submit", () => {
+  $("skillsJson").value = JSON.stringify(agentSkills);
+}, true);
+
+// ================= 配置保存（基础 / 模型 / Agent 三个表单共用） =================
+document.querySelectorAll("form").forEach(form => {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector(".saveBtn");
+    const ok = form.querySelector(".ok");
+    const old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> 保存中…`;
+    try {
+      const r = await fetch("/api/config", { method: "POST", body: new FormData(form) });
+      if (r.ok) {
+        ok.style.display = "inline-flex";
+        setTimeout(() => ok.style.display = "none", 5000);
+      } else {
+        const d = await r.json().catch(() => ({}));
+        toast("保存失败：" + (d.detail || r.status), "err");
+      }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = old;
+    }
+  });
+});
+</script>
+</body>
+</html>

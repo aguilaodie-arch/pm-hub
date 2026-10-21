@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 - PM Hub</title>
+  <style>
+    :root {
+      --bg: #09090b; --bg-panel: #141417;
+      --border: rgba(255,255,255,.075); --border-strong: rgba(255,255,255,.16);
+      --text: #e9e9ee; --text-2: #a2a2ad; --text-3: #62626e;
+      --accent: #7c7cf4; --accent-soft: rgba(124,124,244,.13);
+      --red: #e5605a; --green: #4cc38a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: flex; background: var(--bg); color: var(--text);
+      font-family: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 左侧品牌区 */
+    .hero {
+      flex: 1.2; display: flex; flex-direction: column; justify-content: center;
+      padding: 60px 72px; position: relative; overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+    .hero::before {
+      content: ""; position: absolute; width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,124,244,.16), transparent 65%);
+      top: -180px; left: -180px; pointer-events: none;
+    }
+    .hero::after {
+      content: ""; position: absolute; width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,.1), transparent 65%);
+      bottom: -160px; right: -120px; pointer-events: none;
+    }
+    .hero .mark {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6 55%, #a855f7);
+      box-shadow: 0 4px 14px rgba(124, 92, 246, .35), inset 0 1px 0 rgba(255, 255, 255, .25);
+      display: flex; align-items: center; justify-content: center; color: #fff; margin-bottom: 28px;
+    }
+    .hero h1 { font-size: 34px; font-weight: 700; letter-spacing: -.5px; margin: 0 0 14px; line-height: 1.25; }
+    .hero .sub { font-size: 15px; color: var(--text-2); line-height: 1.8; max-width: 420px; margin-bottom: 40px; }
+    .feat { display: flex; flex-direction: column; gap: 18px; position: relative; }
+    .feat .f { display: flex; gap: 12px; align-items: flex-start; }
+    .feat .fi {
+      width: 30px; height: 30px; border-radius: 8px; flex: 0 0 auto;
+      background: var(--accent-soft); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .feat .fi svg { width: 15px; height: 15px; }
+    .feat .ft { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+    .feat .fd { font-size: 12.5px; color: var(--text-3); }
+
+    /* 右侧表单区 */
+    .panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    .box { width: 100%; max-width: 360px; }
+    .box h2 { font-size: 20px; font-weight: 650; margin: 0 0 6px; }
+    .box .bsub { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+
+    .tabs { display: flex; gap: 4px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 9px; padding: 3px; margin-bottom: 22px; }
+    .tabs div {
+      flex: 1; text-align: center; padding: 7px; font-size: 13px; font-weight: 550;
+      color: var(--text-3); border-radius: 7px; cursor: pointer; transition: all .12s; user-select: none;
+    }
+    .tabs div.active { background: rgba(255,255,255,.09); color: var(--text); }
+
+    label { display: block; font-size: 12.5px; color: var(--text-2); margin: 0 0 6px; font-weight: 550; }
+    input {
+      width: 100%; padding: 10px 12px; margin-bottom: 14px; font-family: inherit; font-size: 14px;
+      background: var(--bg-panel); color: var(--text); border: 1px solid var(--border-strong);
+      border-radius: 8px; outline: none; transition: border-color .12s, box-shadow .12s;
+    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    input::placeholder { color: var(--text-3); }
+    button {
+      width: 100%; padding: 11px; border: none; border-radius: 8px; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 650;
+      background: #ededf2; color: #0b0b0d; transition: background .12s; margin-top: 4px;
+    }
+    button:hover { background: #fff; }
+
+    .alert { padding: 10px 13px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .alert.error { background: rgba(229,96,90,.1); color: var(--red); border: 1px solid rgba(229,96,90,.3); }
+    .alert.ok { background: rgba(76,195,138,.1); color: var(--green); border: 1px solid rgba(76,195,138,.3); }
+    .hint { font-size: 12px; color: var(--text-3); margin-top: 20px; text-align: center; }
+
+    @media (max-width: 860px) {
+      .hero { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="mark">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+    </div>
+    <h1>PM Hub<br>产品需求工作台</h1>
+    <div class="sub">需求池管理、AI 预设计、Axure 原型托管与问答、版本归档沉淀知识库，一站式产品协作平台。</div>
+    <div class="feat">
+      <div class="f">
+        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg></div>
+        <div><div class="ft">项目 · Sprint 两级管理</div><div class="fd">电商、物流、金融……每个迭代多人并行发布原型</div></div>
+      </div>
+      <div class="f">
+        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg></div>
+        <div><div class="ft">一键发布访问链接</div><div class="fd">上传 ZIP 即刻生成免登录链接，研发随开随看</div></div>
+      </div>
+      <div class="f">
+        <div class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"/></svg></div>
+        <div><div class="ft">AI 归档 + 知识库问答</div><div class="fd">自动总结版本价值与逻辑优化，历史逻辑随问随查</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="box">
+      <h2>欢迎回来</h2>
+      <div class="bsub">登录以进入 PM Hub</div>
+
+      <div class="tabs">
+        <div id="tabLogin" class="active" onclick="showForm('login')">登录</div>
+        <div id="tabRegister" onclick="showForm('register')">注册新成员</div>
+      </div>
+
+      {% if error %}<div class="alert error">{{ error }}</div>{% endif %}
+      {% if request.query_params.get("registered") %}<div class="alert ok">注册成功，请登录</div>{% endif %}
+
+      <form method="post" action="/login" id="formLogin">
+        <label>用户名</label>
+        <input name="username" placeholder="请输入用户名" required autofocus />
+        <label>密码</label>
+        <input name="password" type="password" placeholder="请输入密码" required />
+        <button type="submit">登 录</button>
+      </form>
+
+      <form method="post" action="/register" id="formRegister" style="display:none">
+        <label>用户名</label>
+        <input name="username" placeholder="登录使用的用户名" required />
+        <label>显示名（可选）</label>
+        <input name="display_name" placeholder="团队里展示的名字" />
+        <label>密码</label>
+        <input name="password" type="password" placeholder="设置密码" required />
+        <button type="submit">注 册</button>
+      </form>
+
+      <div class="hint">初始管理员账号：admin / admin123</div>
+    </div>
+  </div>
+
+  <script>
+    function showForm(which) {
+      document.getElementById("tabLogin").classList.toggle("active", which === "login");
+      document.getElementById("tabRegister").classList.toggle("active", which === "register");
+      document.getElementById("formLogin").style.display = which === "login" ? "block" : "none";
+      document.getElementById("formRegister").style.display = which === "register" ? "block" : "none";
+    }
+    {% if error and '注册' in error %}showForm('register');{% endif %}
+  </script>
+</body>
+</html>

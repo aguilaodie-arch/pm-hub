@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>发布到内部平台</title>
+<style>
+  body { font-family: -apple-system,"Microsoft YaHei",sans-serif; padding: 14px; font-size: 13px; color:#222;}
+  input { width:100%; padding:6px 8px; margin:4px 0 10px; border:1px solid #ccc; border-radius:6px; }
+  button { width:100%; padding:9px; border:none; border-radius:6px; background:#4c3c8c; color:#fff; font-weight:600; cursor:pointer; }
+  .hint { color:#888; line-height:1.6; margin-top:12px; }
+  code { background:#f2f2f2; padding:1px 4px; border-radius:4px; }
+</style>
+</head>
+<body>
+  <h3>发布到内部平台</h3>
+
+  <label>后端地址</label>
+  <input id="base" placeholder="http://localhost:8000" />
+
+  <label>项目 ID</label>
+  <input id="pid" placeholder="在项目页面 URL 或接口中获取" />
+
+  <label>Sprint ID</label>
+  <input id="sid" placeholder="在 Sprint 列表接口中获取" />
+
+  <button onclick="openPublish()">打开发布页并上传原型</button>
+
+  <div class="hint">
+    <b>使用方式</b><br/>
+    1. 在 Axure 里先「发布 → 生成 HTML 文件」到本地某个文件夹。<br/>
+    2. 点击上方按钮，会打开内部平台的发布页；把生成的文件夹压缩成 ZIP 上传即可。<br/><br/>
+    <b>关于「真正一键」</b><br/>
+    要实现在 Axure 内点击直接把生成产物推送到后端，需要 Axure 的发布插件 SDK + 一个常驻本地的小助手
+    （用于把 Axure 生成的文件打包并通过接口上传）。本目录 <code>companion/</code> 提供了该本地助手的参考实现，
+    接入后插件可调用它完成自动上传。后续可据此打磨为完全无感的「一键发布」。
+  </div>
+
+<script>
+  const KEY = "axure_publish_cfg";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)||"{}"); } catch(e){ return {}; } };
+  const save = (o) => localStorage.setItem(KEY, JSON.stringify(o));
+  const cfg = load();
+  document.getElementById("base").value = cfg.base || "http://localhost:8000";
+  document.getElementById("pid").value = cfg.pid || "";
+  document.getElementById("sid").value = cfg.sid || "";
+
+  function openPublish() {
+    const base = document.getElementById("base").value.trim().replace(/\/$/,"");
+    const pid = document.getElementById("pid").value.trim();
+    const sid = document.getElementById("sid").value.trim();
+    save({ base, pid, sid });
+    // 打开平台发布页（Sprint 维度），由用户在该页上传 ZIP
+    const url = `${base}/?project=${pid}#sprint=${sid}`;
+    if (window.axure && window.axure.browser && window.axure.browser.openUrl) {
+      window.axure.browser.openUrl(url);
+    } else {
+      window.open(url, "_blank");
+    }
+  }
+</script>
+</body>
+</html>

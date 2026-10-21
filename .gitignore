@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# 本地配置（含密钥，切勿提交；模板见 config.example.yaml）
+config.yaml
+
+# 运行产物：数据库 / 向量库 / 上传的原型与材料
+data/
+
+# 本地向量模型（体积大，下载指引见 README）
+models/
+
+# 系统文件
+.DS_Store
+Thumbs.db

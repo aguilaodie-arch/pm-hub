@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+jinja2
+python-multipart
+pyyaml
+requests
+chromadb
+itsdangerous
+onnxruntime
+tokenizers
+numpy
+openpyxl

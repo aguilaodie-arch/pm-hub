@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Axure RP 插件清单（骨架）。
+  说明：Axure 各版本插件清单格式略有差异，若面板未出现，请按你使用的 Axure 版本
+  调整此文件（参考 Axure 官方插件文档 / 已有插件如 Axure 自带示例）。
+  本插件对标蓝湖：在 Axure 内点击「发布到内部平台」即可触发上传。
+-->
+<axure-plugin>
+  <id>com.productteam.axurepublish</id>
+  <name>发布到内部平台</name>
+  <description>一键将 Axure 原型发布到内部平台（生成 HTML 并上传到后端）</description>
+  <version>1.0</version>
+  <author>Product Team</author>
+  <menu>
+    <entry label="发布到内部平台" href="publish.html" />
+  </menu>
+</axure-plugin>

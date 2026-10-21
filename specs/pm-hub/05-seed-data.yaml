@@ -1,0 +1,134 @@
+# 种子数据剧本（覆盖六态需求+两态版本+三角色，支撑 07 验收路径全链路演示）
+
+account:
+  - { id: u1, username: admin, name: 管理员（主）, role: admin, active: true, createdAt: "2026-10-01 09:00",
+      _scenario: "唯一主账号：配置中心权限与已上线回退演示" }
+  - { id: u2, username: wanglei, name: 王磊, role: pm, active: true, createdAt: "2026-10-01 09:05",
+      _scenario: "主线 PM：名下 5 条需求（对应 03-R2 算例）" }
+  - { id: u3, username: liting, name: 李婷, role: pm, active: true, createdAt: "2026-10-01 09:06",
+      _scenario: "第二 PM：演示对话接力与 PM 工作量对比" }
+  - { id: u4, username: chenhao, name: 陈浩, role: dev, active: true, createdAt: "2026-10-01 09:07",
+      _scenario: "研发：原型问答提问演示" }
+  - { id: u5, username: zhaolei, name: 赵磊, role: dev, active: false, createdAt: "2026-10-01 09:08",
+      _scenario: "边界态：停用账号登录拦截演示" }
+
+project:
+  - { id: pj1, name: 电商, createdAt: "2026-10-01 09:00", _scenario: "主线项目：挂两个版本" }
+  - { id: pj2, name: 金融, createdAt: "2026-10-01 09:01", _scenario: "多项目统计分布演示" }
+  - { id: pj3, name: 链接, createdAt: "2026-10-01 09:02", _scenario: "空项目：演示删除项目校验通过路径" }
+
+version:
+  - { id: v86, projectId: pj1, name: Sprint86, status: 已归档,
+      summary: "Sprint86 版本摘要：司机端准驾车型校验四环节拦截上线；运费规则小数位开放至1~5位……",
+      kbDocId: "kb-doc-888", archivedBy: u2, archivedAt: "2026-09-30 18:00", createdAt: "2026-09-01 09:00",
+      _scenario: "已归档版本：演示归档 Tab 展示+摘要查看+需求已上线联动结果" }
+  - { id: v87, projectId: pj1, name: Sprint87, status: 进行中, archivedBy: null, archivedAt: null,
+      createdAt: "2026-10-08 09:00",
+      _scenario: "进行中主线版本：挂原型与多数需求，演示归档操作" }
+  - { id: vf2, projectId: pj2, name: 金融-2026M10, status: 进行中, archivedBy: null, archivedAt: null,
+      createdAt: "2026-10-09 09:00",
+      _scenario: "金融项目版本：跨项目统计分布演示" }
+
+requirement:
+  - { id: RQ2610090003, title: 电商返利规则筛选条件优化, projectId: pj1, versionId: v87, pmId: u2,
+      status: 待澄清, priority: P2, requester: "运营部-王芳", description: "运营反馈批量刷新返利规则时无法按规则组精确筛选，希望列表增加筛选。",
+      value: "减少运营逐个核对工时", jiraUrl: null,
+      plannedOnlineDate: null, actualOnlineDate: null, createdBy: u2, createdAt: "2026-10-09 10:00", updatedAt: "2026-10-09 10:00",
+      _scenario: "待澄清状态演示" }
+  - { id: RQ2610100031, title: 司机端准驾车型校验提示优化, projectId: pj1, versionId: null, pmId: u2,
+      status: 待设计, priority: P1, requester: "客服部-张敏", description: "增驾司机被误拦后提示语需引导联系客服，覆盖绑车/接单等四处提示。",
+      value: "减少客服进线量约15%", jiraUrl: null,
+      plannedOnlineDate: null, actualOnlineDate: null, createdBy: u2, createdAt: "2026-10-10 09:30", updatedAt: "2026-10-10 09:30",
+      _scenario: "versionId=null：演示'未纳入版本'显示为—" }
+  - { id: RQ2610080007, title: 车货合照必填校验（V1.1）, projectId: pj1, versionId: v87, pmId: u2,
+      status: 设计中, priority: P1, requester: "税务合规组", description: "装货环节车货合照≥1张必填，不做AI审核；佐证三要素=车牌可辨+车辆完整+水印。",
+      value: "满足税源地佐证要求", jiraUrl: "https://jira.internal/browse/YXB-1024",
+      plannedOnlineDate: "2026-10-24", actualOnlineDate: null, createdBy: u2, createdAt: "2026-10-08 14:00", updatedAt: "2026-10-10 11:00",
+      _scenario: "设计中主线需求：挂材料+预设计对话，支撑 07 第3-5步" }
+  - { id: RQ2610050012, title: 运费规则小数位开放至1~5位, projectId: pj1, versionId: v87, pmId: u2,
+      status: 研发中, priority: P0, requester: "结算组", description: "运费规则小数位由固定2位开放为1~5位可选，货损五公式全开放。",
+      value: "覆盖经纪人特殊抹零场景", jiraUrl: "https://jira.internal/browse/YXB-998",
+      plannedOnlineDate: "2026-10-20", actualOnlineDate: null, createdBy: u2, createdAt: "2026-10-05 09:00", updatedAt: "2026-10-09 16:00",
+      _scenario: "研发中+P0：优先级筛选演示" }
+  - { id: RQ2609150002, title: 司机端准驾车型四环节拦截, projectId: pj1, versionId: v86, pmId: u2,
+      status: 已上线, priority: P1, requester: "合规部", description: "绑车前置校验+开关收口+接单弹窗拦截，A2>B2>C1。",
+      value: "准驾合规闭环", jiraUrl: null,
+      plannedOnlineDate: "2026-09-28", actualOnlineDate: "2026-09-30", createdBy: u2, createdAt: "2026-09-15 09:00", updatedAt: "2026-09-30 18:00",
+      _scenario: "已上线+已归档版本：只读态与归档联动结果演示" }
+  - { id: RQ2610090021, title: 授信额度占用因子修正说明, projectId: pj1, versionId: v87, pmId: u3,
+      status: 设计中, priority: P2, requester: "风控组", description: "占用未剔除预付的双重扣除问题，优化为按剩余未付占用。",
+      value: "额度口径准确", jiraUrl: null,
+      plannedOnlineDate: null, actualOnlineDate: null, createdBy: u3, createdAt: "2026-10-09 11:00", updatedAt: "2026-10-10 10:00",
+      _scenario: "李婷名下设计中需求：PM 工作量对比演示" }
+  - { id: RQ2610080018, title: 客情标记批量删除上限200, projectId: pj1, versionId: v87, pmId: u3,
+      status: 待串讲, priority: P1, requester: "客服部", description: "客情标记批量删除单次≤200条，已支付运单禁打客诉标记。",
+      value: "防误操作资损", jiraUrl: null,
+      plannedOnlineDate: "2026-10-22", actualOnlineDate: null, createdBy: u3, createdAt: "2026-10-08 16:00", updatedAt: "2026-10-10 09:00",
+      _scenario: "待串讲状态覆盖" }
+  - { id: RQ2610070009, title: 企业端理财产品入口改版, projectId: pj2, versionId: vf2, pmId: u3,
+      status: 研发中, priority: P2, requester: "金融业务部", description: "企业 APP 理财入口迁移至首页金刚区。",
+      value: "理财产品曝光提升", jiraUrl: null,
+      plannedOnlineDate: null, actualOnlineDate: null, createdBy: u3, createdAt: "2026-10-07 09:00", updatedAt: "2026-10-09 09:00",
+      _scenario: "金融项目需求：跨项目统计分布演示" }
+
+material:
+  - { id: m12, requirementId: RQ2610080007, fileName: "税源地佐证要求函.pdf", size: 8388608,
+      mime: "application/pdf", uploadedBy: u2, createdAt: "2026-10-08 14:30",
+      _scenario: "PDF 材料：Agent-1 转文本注入演示" }
+  - { id: m13, requirementId: RQ2610080007, fileName: "挂车围栏遮布现场图.png", size: 1048576,
+      mime: "image/png", uploadedBy: u3, createdAt: "2026-10-09 09:00",
+      _scenario: "图片材料+他人上传：共享可见演示" }
+  - { id: m14, requirementId: RQ2610080007, fileName: "车货合照会议纪要.md", size: 1048576,
+      mime: "text/markdown", uploadedBy: u2, createdAt: "2026-10-10 09:00",
+      _scenario: "md 材料：全文注入演示" }
+
+prototype:
+  - { id: pr7, versionId: v87, name: 车货合照与准驾提示原型, entryPath: index.html,
+      dirPath: "uploads/prototypes/v87/pr7/", fileCount: 213, totalSize: 52428800,
+      uploadedBy: u2, updatedAt: "2026-10-10 15:00",
+      _scenario: "主线原型：免登直链+Agent-2 问答演示" }
+  - { id: pr8, versionId: v87, name: 运费规则配置原型, entryPath: index.html,
+      dirPath: "uploads/prototypes/v87/pr8/", fileCount: 187, totalSize: 52428800,
+      uploadedBy: u3, updatedAt: "2026-10-09 17:00",
+      _scenario: "第二原型：原型列表与同名覆盖入口演示" }
+
+conversation:
+  - { id: cv3, requirementId: RQ2610080007, title: 车货合照必填校验脑暴, createdBy: u2,
+      createdAt: "2026-10-09 10:00", updatedAt: "2026-10-10 11:00",
+      _scenario: "共享对话：u2 发起、u3 接力追问（跨 PM 继承演示）" }
+
+message:
+  - { id: msg101, conversationId: cv3, role: user, content: "煤炭挂车围栏加遮布拍不到货，税源地又要佐证，这个矛盾怎么解？",
+      authorId: u2, createdAt: "2026-10-09 10:01", _scenario: "PM 提问" }
+  - { id: msg102, conversationId: cv3, role: user, content: "参考角度要不要做成强制的？研发问校验规则。",
+      authorId: u3, createdAt: "2026-10-09 10:05", _scenario: "另一 PM 接力追问：对话继承演示" }
+  - { id: msg103, conversationId: cv3, role: assistant, authorId: null,
+      content: "建议不做强制角度：佐证三要素定为车牌可辨+车辆完整+水印，货不可见≠不合规；参考角度仅作建议文案。",
+      createdAt: "2026-10-09 10:06", _scenario: "AI 回复：导出 md 内容演示" }
+
+qaLog:
+  # D17：反馈闭环已移除，feedback/handledBy/handledAt 仅为历史口径存档
+  - { id: q21, prototypeId: pr7, question: "准驾误拦的提示在绑车环节也会出现吗？",
+      answer: "会。根据原型内容，绑车/接单等四处提示统一追加'已增驾请联系客服'。",
+      feedback: 未解决, askedBy: u4, handledBy: null, handledAt: null, createdAt: "2026-10-10 16:00",
+      _scenario: "历史问答记录演示（feedback 为 D17 前的历史值）" }
+  - { id: q22, prototypeId: pr7, question: "车货合照最多传几张？",
+      answer: "最多 5 张，超出顺延不允许。",
+      feedback: 已解决, askedBy: u5, handledBy: null, handledAt: null, createdAt: "2026-10-10 16:30",
+      _scenario: "历史问答记录演示（feedback 为 D17 前的历史值）" }
+
+config:
+  - { key: llm.base_url, value: "https://api.moonshot.cn/v1", updatedAt: "2026-10-10 09:00",
+      _scenario: "MVP 阶段公网 API 演示" }
+  - { key: llm.api_key, value: "sk-demo-key", updatedAt: "2026-10-10 09:00", _scenario: "界面掩码显示演示" }
+  - { key: llm.model, value: "kimi-k3", updatedAt: "2026-10-10 09:00", _scenario: "网关模型名" }
+  - { key: agent1.system_prompt, value: "你是产品需求预设计助手，基于需求字段、材料与历史知识库做 grill-me 式追问与方案探讨，回答范围限于该需求上下文。",
+      updatedAt: "2026-10-10 09:00", _scenario: "Agent-1 提示词配置演示" }
+  - { key: agent1.use_kb, value: "true", updatedAt: "2026-10-10 09:00", _scenario: "Agent-1 挂知识库" }
+  - { key: agent2.system_prompt, value: "你是原型问答助手，只基于当前原型内容与历史知识库回答研发问题；不确定就明说不知道，建议联系产品经理。",
+      updatedAt: "2026-10-10 09:00", _scenario: "Agent-2 提示词配置演示" }
+  - { key: agent2.use_kb, value: "true", updatedAt: "2026-10-10 09:00", _scenario: "Agent-2 挂知识库" }
+  - { key: archive.summary_template, value: "版本号+版本概述+逐需求一段（背景/方案要点/关键口径与枚举/涉及页面）",
+      updatedAt: "2026-10-10 09:00", _scenario: "摘要模板默认结构（A12）" }
+  - { key: kb.rag_base_url, value: "http://192.168.1.10:8080", updatedAt: "2026-10-10 09:00", _scenario: "RAG 产品内网地址" }
+  - { key: kb.rag_api_key, value: "rag-demo-key", updatedAt: "2026-10-10 09:00", _scenario: "RAG API 密钥" }
